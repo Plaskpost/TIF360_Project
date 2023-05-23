@@ -5,7 +5,8 @@ import torch.multiprocessing as mp
 import torch
 
 Max_episodes = 1000
-buffer_size = 5
+buffer_size = 50
+batch_size = 10 # to remove experience replay change the lines 88-93 (remove rand_ind stuff)
 Max_actions = 300
 gamma = 0.99
 
@@ -82,10 +83,12 @@ class worker(mp.Process):
                         buffer_R.append(R)
 
                     buffer_R.reverse()
+
+                    rand_ind = np.random.choice(range(len(buffer_R)), batch_size)
                     
-                    buffer_a = torch.tensor(np.array(buffer_a), dtype=torch.float32)
-                    buffer_R = torch.tensor(buffer_R, dtype=torch.float32).reshape(-1,1)
-                    buffer_s = torch.stack(buffer_s).float()
+                    buffer_a = torch.tensor(np.array(buffer_a), dtype=torch.float32)[rand_ind]
+                    buffer_R = torch.tensor(buffer_R, dtype=torch.float32).reshape(-1,1)[rand_ind]
+                    buffer_s = torch.stack(buffer_s).float()[rand_ind]
 
                     buffer_value = self.localCritic.forward(buffer_s)
 

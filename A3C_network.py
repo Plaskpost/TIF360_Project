@@ -37,7 +37,7 @@ class Actor(nn.Module):
         a1 = nn.ReLU()(self.LinActor2(a1))
         a1 = nn.ReLU()(self.LinActor3(a1))      
 
-        mean = nn.Tanh()(self.mu(a1))
+        mean = self.mu(a1)
         variance = nn.Softplus()(self.sigma(a1))+0.0001
 
         return mean, variance
@@ -46,9 +46,9 @@ class Actor(nn.Module):
         self.eval()
 
         mean, variance = self.forward(x)
-        action = self.distribution(mean,variance).sample()
+        action = self.distribution(mean,variance).rsample()
         
-        return action.numpy()
+        return action.detach().numpy()
 
     def loss_func(self,s,a,R,value):
         self.train()
@@ -58,7 +58,7 @@ class Actor(nn.Module):
         
         dist = self.distribution(mean,variance)
         log_prob = dist.log_prob(a)
-
+        #print(f'log prob: {log_prob} \n mean: {mean} \n variance: {variance} \n action: {a}')
         entropy = -0.5*(torch.log(2*np.pi*variance) + 1)
         lossActor = (log_prob*advantage.detach() + entropy*1e-4)
 

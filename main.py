@@ -22,7 +22,7 @@ if __name__ == '__main__':
     globalCritic.share_memory()
    
     optimizerActor = RMSprop(globalActor.parameters(), lr=1e-5, maximize=True)
-    optimizerCritic = RMSprop(globalCritic.parameters(), lr=1e-5)
+    optimizerCritic = RMSprop(globalCritic.parameters(), lr=1e-5)   
 
     global_ep_count = Value('i', 0)
     global_reward_count = Value('d', 0.0)
@@ -80,6 +80,9 @@ if __name__ == '__main__':
 
     [w.join() for w in workers]
     
+    torch.save(globalActor,'TIF360_Project/Actor')
+    torch.save(globalCritic, 'TIF360_Project/Critic')
+
     state = torch.tensor(env.reset()[0])
     done = False
     final_pol_reward = 0
